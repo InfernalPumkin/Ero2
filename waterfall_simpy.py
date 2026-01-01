@@ -243,9 +243,18 @@ def run_one(params, seed: Optional[int] = None):
     summary['blocked_forward'] = stats['blocked_forward']
     summary['dropped'] = stats['dropped']
     summary['backups_saved'] = stats['backups_saved']
-    summary['backup_retries'] = stats['backup_retries']
     summary['enqueued_forward'] = stats['enqueued_forward']
+    summary['backup_retries'] = stats['backup_retries']
+    # total des tentatives d'envoi dans la file de renvoi (directes + réinsérées depuis back-up)
+    summary['total_forward_attempts'] = summary['enqueued_forward'] + summary['backup_retries']
     summary['completed'] = stats['completed']
+
+    # colonnes calculées pour l'analyse :
+    # nombre de jobs encore non complétés (arrivées moins complétés, drops et refus à la soumission)
+    summary['not_completed_yet'] = summary['arrivals'] - summary['completed'] - summary['dropped'] - summary['blocked_submit']
+    # répartition des restants : en back-up et en forward (non encore envoyés)
+    summary['rest_in_backup'] = summary['backups_saved'] - summary['backup_retries']
+    summary['rest_in_forward'] = summary['total_forward_attempts'] - summary['completed']
 
     summary['mean_service_time'] = statistics.mean(stats['service_times']) if stats['service_times'] else 0.0
     summary['mean_send_time'] = statistics.mean(stats['send_times']) if stats['send_times'] else 0.0
@@ -301,7 +310,7 @@ def run_experiments(args):
         for j in jobs:
             j['run'] = run
             jobs_rows.append(j)
-        print(f"Run {run}/{args.runs} : arrivées={s['arrivals']}, complétés={s['completed']}, abandonnés={s['dropped']}, sauvegardes={s['backups_saved']}, meanW={s['mean_time_in_system']:.4f}")
+        #print(f"Run {run}/{args.runs} : arrivées={s['arrivals']}, complétés={s['completed']}, abandonnés={s['dropped']}, sauvegardes={s['backups_saved']}, meanW={s['mean_time_in_system']:.4f}")
 
     # écrire les fichiers CSV
     summary_csv = os.path.join(args.out_dir, f"{args.out_prefix}_summary.csv")
@@ -322,7 +331,7 @@ def run_experiments(args):
             for row in jobs_rows:
                 writer.writerow(row)
 
-    print(f"Résultats enregistrés : {summary_csv}, {jobs_csv}")
+    #print(f"Résultats enregistrés : {summary_csv}, {jobs_csv}")
 
 
 def parse_args():
