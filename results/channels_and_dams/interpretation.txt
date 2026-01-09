@@ -1,0 +1,28 @@
+Étape 1 : Baseline (Fichier step1...)
+Quoi regarder : Comparez mean_time_ING et mean_time_PREPA.
+
+Interprétation attendue : Vous devriez voir que PREPA attend beaucoup plus longtemps que ING (ou est "noyé").
+
+C'est la justification pour introduire le Dam. "On voit un ratio d'injustice de X (PREPA attend 5x plus)." 
+
+Étape 2 : Channels and Dams (Fichier step2...)
+Quoi regarder :
+
+Comparez le mean_time_PREPA de l'étape 2 vs l'étape 1. Il doit avoir diminué.
+
+Regardez ing_rejected. C'est le prix à payer.
+
+Regardez la var_time_ING ou p95_time_ING. Le Dam a tendance à créer des "à-coups" (pics d'attente quand c'est fermé), donc la variance peut augmenter.
+
+
+Conclusion attendue : "Le Dam protège les PREPA (temps réduit), mais au prix d'un taux de refus de X% pour les ING et d'une instabilité accrue." 
+
+Étape 3 : Alternative / Token Bucket (Fichier step3...)
+Quoi regarder : Comparez principalement la Variance (var_time_ING) ou le p95 avec l'étape 2 (Dam).
+
+Interprétation attendue : Le Token Bucket "lisse" le trafic au lieu de le bloquer par blocs entiers.
+
+Vous devriez avoir une variance plus faible (ressenti moins aléatoire) pour une performance moyenne similaire.
+
+
+Conclusion : C'est l'option "plus réaliste" recommandée car elle réduit la frustration (variance).
