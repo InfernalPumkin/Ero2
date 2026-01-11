@@ -1,6 +1,6 @@
 # Ero2 — SAÉ Systèmes d’attente (moulinette)
 
-Ce dépôt contient une simulation et une analyse (via notebooks) d’une **infrastructure de correction automatique** (“moulinette”) vue comme un **système d’attente**.
+Ce dépôt contient une simulation et une analyse d’une **infrastructure de correction automatique** (“moulinette”) vue comme un **système d’attente**.
 
 Le sujet comporte deux scénarios :
 - **Waterfall**
