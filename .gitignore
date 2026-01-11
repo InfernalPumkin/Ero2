@@ -1,1 +1,8 @@
-doc.txt
+results/
+__pycache__
+
+\[ERO2\]\ Grille\ critériée\ dévaluation.pdf
+results_q1/
+results_q2/
+results_q3c/
+results_q3d/
