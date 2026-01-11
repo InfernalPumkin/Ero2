@@ -233,20 +233,20 @@ if __name__ == '__main__':
     p.add_argument('--mu-ing', type=float, default=1.0, help="Mu ING (rapide)")
     p.add_argument('--mu-prepa', type=float, default=0.2, help="Mu PREPA (lent)")
     p.add_argument('--mu-send', type=float, default=2.0)
-    p.add_argument('--K', type=int, default=2)
-    
+    p.add_argument('--K', type=int, default=3)
+
     # Paramètres Dam / Token
     p.add_argument('--mode', choices=['baseline', 'dam', 'token'], default='baseline')
     p.add_argument('--t-b', type=float, default=10.0, help="Temps de blocage Dam")
     p.add_argument('--token-rate', type=float, default=1.0, help="Jetons par sec")
     p.add_argument('--token-cap', type=int, default=10, help="Max jetons")
 
-    p.add_argument('--sim-time', type=float, default=1000.0)
-    p.add_argument('--runs', type=int, default=20)
+    p.add_argument('--sim-time', type=float, default=10000.0)
+    p.add_argument('--runs', type=int, default=30)
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--out-dir', type=str, default='results')
     p.add_argument('--out-prefix', type=str, default='channels')
-    
+
     args = p.parse_args()
     run_experiments(args)
 
