@@ -171,6 +171,9 @@ def arrival_generator(env, exec_resource, forward_store, params, stats, backup_s
     """
     id_counter = 0
     lam = params['lam']
+    # Cas limite : λ <= 0 => aucune arrivée (évite un timeout infini).
+    if lam <= 0:
+        return
     while env.now < params['sim_time']:
         # échantillonne le temps entre deux arrivées
         ia = random.expovariate(lam) if lam > 0 else math.inf
