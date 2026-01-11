@@ -32,7 +32,7 @@ def dam_controller(env, params):
         
         # Phase d'ouverture
         params['dam_open'] = True
-        yield env.timeout(params['t_b'] / 2.0)
+        yield env.timeout(params['t_o'])
 
 def token_bucket_refill(env, token_container, params):
     """
@@ -196,7 +196,8 @@ def run_experiments(args):
         'K': args.K,
         'sim_time': args.sim_time,
         'mode': args.mode,          # 'baseline', 'dam', 'token'
-        't_b': args.t_b,            # Pour mode Dam
+        't_b': args.t_b,            # Pour mode Dam (bloqué)
+        't_o': args.t_o,            # Pour mode Dam (ouvert)
         'token_rate': args.token_rate, # Pour mode Token
         'token_cap': args.token_cap
     }
@@ -233,20 +234,21 @@ if __name__ == '__main__':
     p.add_argument('--mu-ing', type=float, default=1.0, help="Mu ING (rapide)")
     p.add_argument('--mu-prepa', type=float, default=0.2, help="Mu PREPA (lent)")
     p.add_argument('--mu-send', type=float, default=2.0)
-    p.add_argument('--K', type=int, default=2)
-    
+    p.add_argument('--K', type=int, default=3)
+
     # Paramètres Dam / Token
     p.add_argument('--mode', choices=['baseline', 'dam', 'token'], default='baseline')
     p.add_argument('--t-b', type=float, default=10.0, help="Temps de blocage Dam")
+    p.add_argument('--t-o', type=float, default=5.0, help="Temps d'ouverture du Dam (en sec)")
     p.add_argument('--token-rate', type=float, default=1.0, help="Jetons par sec")
     p.add_argument('--token-cap', type=int, default=10, help="Max jetons")
 
-    p.add_argument('--sim-time', type=float, default=1000.0)
-    p.add_argument('--runs', type=int, default=20)
+    p.add_argument('--sim-time', type=float, default=10000.0)
+    p.add_argument('--runs', type=int, default=30)
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--out-dir', type=str, default='results')
     p.add_argument('--out-prefix', type=str, default='channels')
-    
+
     args = p.parse_args()
     run_experiments(args)
 
