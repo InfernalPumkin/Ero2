@@ -3,12 +3,14 @@
 Ce dépôt contient une simulation et une analyse d’une **infrastructure de correction automatique** (“moulinette”) vue comme un **système d’attente**.
 
 Le sujet comporte deux scénarios :
+
 - **Waterfall**
 - **Channels & Dams**
 
 ## Sujet: Waterfall
 
 L’idée du modèle Waterfall :
+
 - **Étape 1 (exécution des tests)** : une file FIFO alimentée par des arrivées Poisson, servie par **K serveurs** (exécuteurs).
 - **Étape 2 (envoi du résultat)** : une file FIFO servie par **1 serveur** (envoi front).
 - Capacités finies optionnelles : `ks` (capacité système étape 1) et `kf` (capacité file étape 2).
@@ -17,20 +19,23 @@ L’idée du modèle Waterfall :
 ### Structure des fichiers
 
 #### Code
+
 - `waterfall_simpy.py`
-	- Script principal de simulation **SimPy** du modèle Waterfall.
-	- Génère des fichiers CSV (résumé + détails par job) dans `results/`.
+  - Script principal de simulation **SimPy** du modèle Waterfall.
+  - Génère des fichiers CSV (résumé + détails par job) dans `results/`.
 
 #### Notebooks (analyse et graphes)
+
 - `waterfall.ipynb`
-	- Notebook “principal” : exécute des expériences, charge les CSV et produit les graphes/analyses (Q1/Q2/Q3 + synthèse).
-	- Si vous lancez **Run All**, vous obtenez les tests et les graphes.
+  - Notebook “principal” : exécute des expériences, charge les CSV et produit les graphes/analyses (Q1/Q2/Q3 + synthèse).
+  - Si vous lancez **Run All**, vous obtenez les tests et les graphes.
 
 #### Données / résultats
+
 - `results/`
-	- Sorties brutes des simulations (CSV). Typiquement :
-		- `*_summary.csv` : une ligne par run (métriques agrégées)
-		- `*_jobs.csv` : une ligne par job complété (timestamps et durées)
+  - Sorties brutes des simulations (CSV). Typiquement :
+    - `*_summary.csv` : une ligne par run (métriques agrégées)
+    - `*_jobs.csv` : une ligne par job complété (timestamps et durées)
 
 ### Installation / prérequis
 
@@ -38,6 +43,7 @@ L’idée du modèle Waterfall :
 - Packages : `simpy`, `matplotlib`, `pandas` (et éventuellement `numpy`)
 
 Installation rapide :
+
 ```bash
 python3 -m pip install --user simpy matplotlib pandas numpy
 ```
@@ -49,6 +55,7 @@ python3 -m pip install --user simpy matplotlib pandas numpy
 2) Faire **Run All**.
 
 Le notebook :
+
 - lance des simulations via `waterfall_simpy.py` (commandes `python3 ...`),
 - écrit des CSV dans `results/`,
 - lit les CSV,
@@ -57,16 +64,18 @@ Le notebook :
 ### Lancer une simulation en ligne de commande
 
 Exemple :
+
 ```bash
 python3 waterfall_simpy.py \
-	--lam 2.0 --mu-exec 1.0 --mu-send 1.5 \
-	--K 3 --ks 100 --kf 50 \
-	--sim-time 10000 --runs 30 \
-	--backup systematic --backup-p 0.5 \
-	--seed 42 --out-dir results --out-prefix results_baseline
+    --lam 2.0 --mu-exec 1.0 --mu-send 1.5 \
+    --K 3 --ks 100 --kf 50 \
+    --sim-time 10000 --runs 30 \
+    --backup systematic --backup-p 0.5 \
+    --seed 42 --out-dir results --out-prefix results_baseline
 ```
 
 Deux fichiers sont produits :
+
 - `results/results_baseline_summary.csv`
 - `results/results_baseline_jobs.csv`
 
@@ -75,40 +84,50 @@ Deux fichiers sont produits :
 Tous les paramètres sont des arguments CLI.
 
 #### Intensités / capacités
+
 - `--lam` : taux d’arrivée $\lambda$ (arrivées Poisson). Unités = “par unité de temps” de votre simulation.
 - `--mu-exec` : taux de service $\mu_{exec}$ des serveurs d’exécution (étape 1). Service ~ Exp($\mu_{exec}$).
 - `--mu-send` : taux de service $\mu_{send}$ du serveur d’envoi (étape 2). Service ~ Exp($\mu_{send}$).
 - `--K` : nombre de serveurs en parallèle à l’étape 1.
 
 #### Tailles de file (capacités)
+
 - `--ks` : capacité **totale** du système d’exécution (étape 1) = (en service + en attente).
-	- `--ks 0` signifie **infini**.
-	- Si plein : la soumission est refusée (`blocked_submit`).
+  
+  - `--ks 0` signifie **infini**.
+  - Si plein : la soumission est refusée (`blocked_submit`).
 
 - `--kf` : capacité de la file d’envoi (étape 2).
-	- `--kf 0` signifie **infini**.
-	- Si plein : comportement dépend de la politique de back‑up (voir ci-dessous).
+  
+  - `--kf 0` signifie **infini**.
+  - Si plein : comportement dépend de la politique de back‑up (voir ci-dessous).
 
 #### Politique “back‑up” (gestion de file 2 pleine)
+
 - `--backup` :
-	- `none` : pas de sauvegarde → perte (`dropped`) = “page blanche” côté étudiant.
-	- `systematic` : sauvegarde systématique en back‑up, ré-essaie plus tard.
-	- `probabilistic` : sauvegarde avec probabilité `--backup-p`, sinon perte.
+  
+  - `none` : pas de sauvegarde → perte (`dropped`) = “page blanche” côté étudiant.
+  - `systematic` : sauvegarde systématique en back‑up, ré-essaie plus tard.
+  - `probabilistic` : sauvegarde avec probabilité `--backup-p`, sinon perte.
 
 - `--backup-p` : probabilité de sauvegarde si `--backup probabilistic`.
+
 - `--backup-retry-dt` : intervalle entre deux tentatives de réinsertion depuis le back‑up vers la file 2.
 
 #### Durée / répétitions
+
 - `--sim-time` : horizon de simulation (arrivées générées jusqu’à ce temps).
 - `--grace` : temps de “grâce” après `sim-time` pour drainer les files (laisser l’envoi terminer des jobs).
 - `--runs` : nombre de runs indépendants (pour moyenne ± écart‑type).
 - `--seed` : graine de base (le script utilise `seed + run`).
 
 #### Sorties
+
 - `--out-dir` : dossier de sortie (par défaut `results`).
 - `--out-prefix` : préfixe des fichiers CSV (`<prefix>_summary.csv`, `<prefix>_jobs.csv`).
 
 ### Métriques principales (dans `*_summary.csv`)
+
 - `arrivals` : nombre d’arrivées (tags tentés).
 - `blocked_submit` / `rate_blocked_submit` : refus à la soumission (système étape 1 plein).
 - `blocked_forward` / `rate_blocked_forward` : tentatives bloquées à l’entrée de la file 2 (utile surtout quand on drop).
@@ -142,15 +161,19 @@ Le script accepte de nombreux arguments en ligne de commande pour ajuster le sc�
 `--mu-prepa` : Vitesse de traitement des PREPA (souvent plus lent).
 `--mu-send` : Vitesse du serveur d'envoi final.Système et Régulation
 `--K` : Nombre de serveurs de traitement en parallèle (capacité de la moulinette).
-`--mode` : Stratégie de contrôle :baseline : Pas de régulation (FIFO).dam : Barrage périodique (fermé pendant t-b, ouvert pendant t-b/2).
+`--mode` : Stratégie de contrôle :
+
+- `baseline` : Pas de régulation (FIFO).
+- `dam` : Barrage périodique (fermé pendant t-b, ouvert pendant t-o).
+- `token` : Régulation par débit à l'aide d'un mécanisme de type token bucket.
 
 #### Dam : Régulation par Barrage
 
-`--t-b` : Définit le temps de blocage (en secondes) en .
+`--t-b` : Définit le temps de blocage du barrage.
+`--t-o` : Définit le temps d'ouverture du barrage.
 
 #### Token : Régulation par débit (Token Bucket).
 
-`--t-b` : Temps de blocage du barrage.
 `--token-rate` : Vitesse de génération des jetons (débit autorisé pour les ING).
 `--token-cap` : Capacité maximum du réservoir de jetons (tolérance aux rafales).
 
@@ -164,19 +187,20 @@ Le script accepte de nombreux arguments en ligne de commande pour ajuster le sc�
 
 Voici les valeurs configurées par défaut dans le script :
 
-| Paramètre      | Valeur   | Description               |
-| -------------- | -------- | ------------------------- |
-| `--lam-ing`    | 2.0      | Arrivées fréquentes (ING) |
-| `--lam-prepa`  | 0.2      | Arrivées rares (PREPA)    |
-| `--mu-ing`     | 1.0      | Traitement rapide         |
-| `--mu-prepa`   | 0.2      | Traitement lent           |
-| `--mu-send`    | 2.0      | Envoi très rapide         |
-| `--K`          | 3        | 3 serveurs de calcul      |
-| `--mode`       | baseline | Mode sans rejet           |
-| `--t-b`        | 10.0     | Barrage de 10 sec         |
-| `--token-rate` | 1.0      | 1 jeton généré par sec    |
-| `--token-cap`  | 10       | Stock max de 10 jetons    |
-| `--sim-time`   | 10000.0  | Durée de simulation       |
-| `--runs`       | 30       | 30 répétitions            |
-| `--out-dir`    | results  | Dossier de sortie         |
-| `--out-prefix` | channels | Fichier de sortie         |
+| Paramètre      | Valeur   | Description                  |
+| -------------- | -------- | ---------------------------- |
+| `--lam-ing`    | 2.0      | Arrivées fréquentes (ING)    |
+| `--lam-prepa`  | 0.2      | Arrivées rares (PREPA)       |
+| `--mu-ing`     | 1.0      | Traitement rapide            |
+| `--mu-prepa`   | 0.2      | Traitement lent              |
+| `--mu-send`    | 2.0      | Envoi très rapide            |
+| `--K`          | 3        | 3 serveurs de calcul         |
+| `--mode`       | baseline | Mode sans rejet              |
+| `--t-b`        | 10.0     | Barrage fermé 10 sec         |
+| `--t-o`        | 5.0      | Barrage ouvert 5 sec         |
+| `--token-rate` | 1.0      | 1 jeton généré par sec       |
+| `--token-cap`  | 10       | Stock max de 10 jetons       |
+| `--sim-time`   | 10000.0  | Durée de simulation          |
+| `--runs`       | 30       | 30 répétitions               |
+| `--out-dir`    | results  | Dossier de sortie            |
+| `--out-prefix` | channels | Préfixe du fichier de sortie |
